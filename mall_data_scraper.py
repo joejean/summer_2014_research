@@ -6,6 +6,7 @@ import re
 
 base_url = "http://www.mallsinfo.com"
 all_malls_url ="http://www.mallsinfo.com/all-malls"
+malls_data_dict_list = [] #List of all the dictionaries of malls. One "mall dictionary" contains info about one mall
 
 #Regular Expression Code to find the Longitude and Latitude in the html document
 re1='(LatLng)'	# Word 1
@@ -34,8 +35,8 @@ def get_malls_urls():
 
 def get_malls_data(mall_url):
 
-	malls_data = {}
 	
+	malls_data = {} #"mall dictionary"
 	response = requests.get(base_url + mall_url)
 	soup = BeautifulSoup(response.text)
 	m = rg.search(response.text)
@@ -56,13 +57,7 @@ def get_malls_data(mall_url):
 	malls_data['mall_number_of_stores'] = (soup.select('dd:nth-of-type(4)'))[0].get_text()
 	malls_data['mall_stores_list'] = [a.get_text() for a in soup.select('#stores a')]
 
-	
-
-	#mallsdatafile = open("mallsdata.txt","a")
-
-	json.dump(malls_data, mallsdatafile)
-
-	#mallsdatafile.close()
+	malls_data_dict_list.append(malls_data) #add each "mall dictionary to the List, this is to avoid problem when dumping/load the data in JSON"
 
 	return malls_data
 
@@ -75,9 +70,12 @@ mallsfile = open('mall_urls.txt', 'r')
 mallsdatafile = open("mallsdata.txt","a")
 
 
+
 for url in mallsfile:
 	print get_malls_data(url.strip("\n"))
-	time.sleep(5) #Delay of 5 seconds between requests
+	time.sleep(2) #Delay of 5 seconds between requests
+
+json.dump(malls_data_dict_list, mallsdatafile) #dump the data in JSON format.
 
 mallsdatafile.close()
 
